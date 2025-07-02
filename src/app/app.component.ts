@@ -1,12 +1,15 @@
+import { HeaderComponent } from './components/header/header.component';
+import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  standalone: true,
+  imports: [HeaderComponent, DashboardComponent],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.css'
+  styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  title = 'site';
+  
 }
