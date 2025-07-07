@@ -29,55 +29,56 @@
   </div>
 
   <section class="grid grid-cols-1 md:grid-cols-4 gap-8 mt-2 pr-8">
-  <div class="bg-white shadow rounded-lg p-4 border-l-4 border-blue-500 ml-4 cursor-pointer"
+    <!-- <p>*ngIf="sheetData">{{ sheetData | json }}</p> -->
+    <div class="bg-white shadow rounded-lg p-4 border-l-4 border-blue-500 ml-4 cursor-pointer"
       (click)="showPopup('totalAssociates')">
-    <div class="flex justify-between items-center">
-      <div>
-        <h4 class="text-gray-500 text-sm">Total Associates</h4>
-        <p class="text-2xl font-bold text-gray-800" id="totalAssociates">{{ totalAssociates }}</p>
-      </div>
-      <div class="bg-blue-100 p-2 rounded">
-        <i class="fas fa-users text-blue-500"></i>
-      </div>
-    </div>
-  </div>
-  <div class="bg-white shadow rounded-lg p-4 border-l-4 border-green-500 cursor-pointer"
-    (click)="showPopup('topPerformers')">
-    <div class="flex justify-between items-center">
-      <div>
-        <h4 class="text-gray-500 text-sm">Top Performers</h4>
-        <p class="text-2xl font-bold text-gray-800">{{ topPerformers }}</p>
-      </div>
-      <div class="bg-green-100 p-2 rounded">
-        <i class="fas fa-star text-green-500"></i>
+      <div class="flex justify-between items-center">
+        <div>
+          <h4 class="text-gray-500 text-sm">Total Associates</h4>
+          <p class="text-2xl font-bold text-gray-800" id="totalAssociates">{{ totalAssociates }}</p>
+        </div>
+        <div class="bg-blue-100 p-2 rounded">
+          <i class="fas fa-users text-blue-500"></i>
+        </div>
       </div>
     </div>
-  </div>
-  <div class="bg-white shadow rounded-lg p-4 border-l-4 border-yellow-500 cursor-pointer"
-    (click)="showPopup('averagePerformers')">
-    <div class="flex justify-between items-center">
-      <div>
-        <h4 class="text-gray-500 text-sm">Average Performers</h4>
-        <p class="text-2xl font-bold text-gray-800">{{ averagePerformers }}</p>
-      </div>
-      <div class="bg-yellow-100 p-2 rounded">
-        <i class="fas fa-star text-yellow-500"></i>
-      </div>
-    </div>
-  </div>
-  <div class="bg-white shadow rounded-lg p-4 border-l-4 border-red-500 cursor-pointer"
-    (click)="showPopup('bottomPerformers')">
-    <div class="flex justify-between items-center">
-      <div>
-        <h4 class="text-gray-500 text-sm">Bottom Performers</h4>
-        <p class="text-2xl font-bold text-gray-800">{{ bottomPerformers }}</p>
-      </div>
-      <div class="bg-red-100 p-2 rounded">
-        <i class="fas fa-clipboard-list text-red-500"></i>
+    <div class="bg-white shadow rounded-lg p-4 border-l-4 border-green-500 cursor-pointer"
+      (click)="showPopup('topPerformers')">
+      <div class="flex justify-between items-center">
+        <div>
+          <h4 class="text-gray-500 text-sm">Top Performers</h4>
+          <p class="text-2xl font-bold text-gray-800">{{ topPerformers }}</p>
+        </div>
+        <div class="bg-green-100 p-2 rounded">
+          <i class="fas fa-star text-green-500"></i>
+        </div>
       </div>
     </div>
-  </div>
-</section>
+    <div class="bg-white shadow rounded-lg p-4 border-l-4 border-yellow-500 cursor-pointer"
+      (click)="showPopup('averagePerformers')">
+      <div class="flex justify-between items-center">
+        <div>
+          <h4 class="text-gray-500 text-sm">Average Performers</h4>
+          <p class="text-2xl font-bold text-gray-800">{{ averagePerformers }}</p>
+        </div>
+        <div class="bg-yellow-100 p-2 rounded">
+          <i class="fas fa-star text-yellow-500"></i>
+        </div>
+      </div>
+    </div>
+    <div class="bg-white shadow rounded-lg p-4 border-l-4 border-red-500 cursor-pointer"
+      (click)="showPopup('bottomPerformers')">
+      <div class="flex justify-between items-center">
+        <div>
+          <h4 class="text-gray-500 text-sm">Bottom Performers</h4>
+          <p class="text-2xl font-bold text-gray-800">{{ bottomPerformers }}</p>
+        </div>
+        <div class="bg-red-100 p-2 rounded">
+          <i class="fas fa-clipboard-list text-red-500"></i>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <div class="flex flex-col gap-4  mx-auto">
@@ -174,7 +175,7 @@
         </button>
         <button (click)="showMissions('Hard Consult Rate')"
           class="flex items-center justify-start gap-3 bg-blue-50 text-blue-700 font-semibold py-3 px-4 rounded-lg hover:bg-blue-100 shadow">
-          <img src="ssets/images/hard.png" alt="Hard Consult Rate" class="w-7 h-7"> Hard Consult Rate
+          <img src="hard.png" alt="Hard Consult Rate" class="w-7 h-7"> Hard Consult Rate
         </button>
         <button (click)="showMissions('Signal Ratio')"
           class="flex items-center justify-start gap-3 bg-blue-50 text-blue-700 font-semibold py-3 px-4 rounded-lg hover:bg-blue-100 shadow">
@@ -280,17 +281,24 @@
     </div>
   </section>
 
-  <div id="popupModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50" [ngClass]="{'flex': showStatPopup, 'hidden': !showStatPopup}">
-  <div class="bg-white rounded-lg shadow-lg p-6 w-11/12 md:w-1/3">
-    <div class="flex justify-between items-center mb-4">
-      <h2 id="popupTitle" class="text-lg font-semibold">{{ popupTitle }}</h2>
-      <button (click)="closePopup()" class="text-gray-500 hover:text-gray-700">&times;</button>
+  <div id="popupModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50"
+    [ngClass]="{'flex': showStatPopup, 'hidden': !showStatPopup}">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-11/12 md:w-1/3">
+      <div class="flex justify-between items-center mb-4">
+        <h2 id="popupTitle" class="text-lg font-semibold">{{ popupTitle }}</h2>
+        <button (click)="closePopup()" class="text-gray-500 hover:text-gray-700">&times;</button>
+      </div>
+      <!-- Show search only in popup -->
+      <div *ngIf="showStatPopup">
+        <input type="text" [(ngModel)]="searchTerm" (input)="onSearchAssociate()" placeholder="Search associates..."
+          class="w-full mb-3 p-2 border border-gray-300 rounded"
+          *ngIf="popupTitle === 'Total Associates' || popupTitle === 'Top Performers' || popupTitle === 'Average Performers' || popupTitle === 'Bottom Performers'" />
+      </div>
+      <ul id="popupContent" class="space-y-2 text-sm text-gray-700 max-h-72 overflow-y-auto">
+        <li *ngFor="let item of filteredPopupContent">{{ item }}</li>
+      </ul>
     </div>
-    <ul id="popupContent" class="space-y-2 text-sm text-gray-700">
-      <li *ngFor="let item of popupContent">{{ item }}</li>
-    </ul>
   </div>
-</div>
 
   <div id="missionModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
     <div class="bg-white rounded-lg shadow-lg p-6 w-11/12 md:w-1/3">

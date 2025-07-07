@@ -8,15 +8,17 @@ interface SiteStats {
 
 import { Component, OnInit } from '@angular/core';
 import { SiteDataService } from '../../services/site-data.service';
-import { FormsModule } from '@angular/forms';
-import { PopupDataService } from '../../services/popup-data.service';
+import { GoogleAuthService } from '../../services/google-auth.service';
 import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+
 
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  providers: [GoogleAuthService],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
@@ -26,8 +28,10 @@ export class DashboardComponent implements OnInit {
   averagePerformers = 0;
   bottomPerformers = 0;
 
-  constructor(private siteDataService: SiteDataService) {}
-
+  constructor(
+    private siteDataService: SiteDataService,
+    private googleAuth: GoogleAuthService
+  ) { }
   siteStats: any;
   selectedSite: string = 'Select Site';
   startDate: string = '';
@@ -45,14 +49,35 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {      
-      this.siteDataService.fetchSheetData().subscribe(data => {
-      // Assuming each row has a 'rating' column as a number
-      this.totalAssociates = data.length;
-      this.topPerformers = data.filter(row => row.Rating == 5 || row.Rating == 4).length;
-      this.averagePerformers = data.filter(row => row.Rating == 3).length;
-      this.bottomPerformers = data.filter(row => row.Rating == 2 || row.Rating == 1).length;
+  sheetData: any[] = [];
+  headers: string[] = [];
+
+
+  ngOnInit(): void {
+    const spreadsheetId = '1H7LdfDNYhufySKJkQYcidL6cQbOVpFisUVZqG_bKBIE';
+    const range = 'TSR_LDAP_wise_Performance!B1:J100';
+    const apiKey = 'AIzaSyB2Wal4dub_mS231LVH2yq_oPQBckF74Q4';
+
+    this.googleAuth.getSheetData(spreadsheetId, range, apiKey).then(data => {
+      this.headers = data[0];
+      this.sheetData = data.slice(1);
+      const ratingIndex = this.headers.indexOf('Rating');
+      this.totalAssociates = this.sheetData.length;
+      this.topPerformers = this.sheetData.filter(row => row[ratingIndex] == 5 || row[ratingIndex] == 4).length;
+      this.averagePerformers = this.sheetData.filter(row => row[ratingIndex] == 3).length;
+      this.bottomPerformers = this.sheetData.filter(row => row[ratingIndex] == 2 || row[ratingIndex] == 1).length;
     });
+  }
+
+
+  async loadData() {
+
+    const spreadsheetId = '1H7LdfDNYhufySKJkQYcidL6cQbOVpFisUVZqG_bKBIE';
+
+    const range = 'TSR_LDAP_wise_Performance!B1:J13';
+
+    this.sheetData = await this.googleAuth.getSheetData(spreadsheetId, range, 'AIzaSyB2Wal4dub_mS231LVH2yq_oPQBckF74Q4');
+    console.log(this.sheetData);
   }
 
   updateSiteData(): void {
@@ -183,7 +208,7 @@ export class DashboardComponent implements OnInit {
         row.appendChild(score);
         missionList.appendChild(row);
       });
-    } 
+    }
   }
 
 
@@ -201,33 +226,64 @@ export class DashboardComponent implements OnInit {
   }
 
   showStatPopup = false;
-popupTitle = '';
-popupContent: string[] = [];
+  popupTitle = '';
+  popupContent: string[] = [];
+  searchTerm: string = '';
+  filteredPopupContent: string[] = [];
 
-showPopup(type: string) {
-  this.showStatPopup = true;
-  switch (type) {
-    case 'totalAssociates':
-      this.popupTitle = 'Total Associates';
-      this.popupContent = ['List or details for Total Associates...'];
-      break;
-    case 'topPerformers':
-      this.popupTitle = 'Top Performers';
-      this.popupContent = ['List or details for Top Performers...'];
-      break;
-    case 'averagePerformers':
-      this.popupTitle = 'Average Performers';
-      this.popupContent = ['List or details for Average Performers...'];
-      break;
-    case 'bottomPerformers':
-      this.popupTitle = 'Bottom Performers';
-      break;
+  onSearchAssociate() {
+    const term = this.searchTerm.toLowerCase();
+    this.filteredPopupContent = this.popupContent.filter(name =>
+      name.toLowerCase().includes(term)
+    );
   }
-}
 
-closePopup() {
-  this.showStatPopup = false;
-}
+  showPopup(type: string) {
+    this.showStatPopup = true;
+    this.searchTerm = '';
+    const nameIndex = this.headers.indexOf('Name');
+    const ratingIndex = this.headers.indexOf('Rating');
+    let filtered: any[] = [];
+
+    switch (type) {
+      case 'totalAssociates':
+        this.popupTitle = 'Total Associates';
+        this.popupContent = this.sheetData
+          .map(row => row[nameIndex])
+          .filter(name => !!name)
+          .sort((a: string, b: string) => a.localeCompare(b));
+        break;
+      case 'topPerformers':
+        this.popupTitle = 'Top Performers';
+        filtered = this.sheetData.filter(row => row[ratingIndex] == 5 || row[ratingIndex] == 4);
+        this.popupContent = filtered
+          .map(row => row[nameIndex])
+          .filter(name => !!name)
+          .sort((a: string, b: string) => a.localeCompare(b));
+        break;
+      case 'averagePerformers':
+        this.popupTitle = 'Average Performers';
+        filtered = this.sheetData.filter(row => row[ratingIndex] == 3);
+        this.popupContent = filtered
+          .map(row => row[nameIndex])
+          .filter(name => !!name)
+          .sort((a: string, b: string) => a.localeCompare(b));
+        break;
+      case 'bottomPerformers':
+        this.popupTitle = 'Bottom Performers';
+        filtered = this.sheetData.filter(row => row[ratingIndex] == 2 || row[ratingIndex] == 1);
+        this.popupContent = filtered
+          .map(row => row[nameIndex])
+          .filter(name => !!name)
+          .sort((a: string, b: string) => a.localeCompare(b));
+        break;
+    }
+    this.filteredPopupContent = [...this.popupContent];
+  }
+
+  closePopup() {
+    this.showStatPopup = false;
+  }
   filterStats(filterType: string) {
     // Add your filtering logic here
     // For now, just log the filter type
