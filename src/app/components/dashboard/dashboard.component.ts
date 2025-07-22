@@ -5,14 +5,22 @@ interface SiteStats {
   bottom: number;
   kudos: string;
 }
+interface Person {
+  name: string;
+  status: string;
+  specialization: string;
+}
+interface CesData {
+  string_field_6: string;
+  string_field_9: string;
+}
 
 import { Component, OnInit } from '@angular/core';
 import { SiteDataService } from '../../services/site-data.service';
 import { GoogleAuthService } from '../../services/google-auth.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-
-
+import { CesDataService } from '../../services/ces-data.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -27,18 +35,52 @@ export class DashboardComponent implements OnInit {
   topPerformers = 0;
   averagePerformers = 0;
   bottomPerformers = 0;
-
   constructor(
     private siteDataService: SiteDataService,
-    private googleAuth: GoogleAuthService
+    private googleAuth: GoogleAuthService,
+    private cesDataService: CesDataService
   ) { }
+  selectedSpecialization: string = 'All Specializations';
+  specializations: string[] = [
+    'All Specializations',
+    'Compute',
+    'DevOps',
+    'Security',
+    'GKE',
+    'Networking',
+    'Databases',
+    'Data Analytics',
+    'AI/ML',
+    'Serverless',
+    'Storage'
+  ];
+
   siteStats: any;
   selectedSite: string = 'Select Site';
   startDate: string = '';
   endDate: string = '';
-  allItems: any[] = [/* your data here */];
+  allItems: any[] = [];
   filteredItems: any[] = [];
+  searchTerm: string = '';
+  filteredPopupContent: string[] = [];
+  cesData: any[] = [];
+  sheetData: any[] = [];
+  headers: string[] = [];
+  trainingSheetHeaders: string[] = [];
+  trainingSheetData: any[] = [];
+  nestedCount = 0;
+  readyCount = 0;
+  trainingCount = 0;
+  onboardingCount = 0;
+  data: Person[] = [];
 
+
+  onSearchAssociate() {
+    const term = this.searchTerm.toLowerCase();
+    this.filteredPopupContent = this.popupContent.filter(name =>
+      name.toLowerCase().includes(term)
+    );
+  }
   filterByDate() {
     const start = new Date(this.startDate);
     const end = new Date(this.endDate);
@@ -49,59 +91,101 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  sheetData: any[] = [];
-  headers: string[] = [];
-
 
   ngOnInit(): void {
-    const spreadsheetId = '1H7LdfDNYhufySKJkQYcidL6cQbOVpFisUVZqG_bKBIE';
-    const range = 'TSR_LDAP_wise_Performance!B1:J100';
+    const spreadsheetId = '1mfnbjmMP6nUavrjlV5C_g7W1S4Hx72jABsfY-aQiT10';
+    const range = 'TSR_LDAP_wise_Performance!A1:D189';
     const apiKey = 'AIzaSyB2Wal4dub_mS231LVH2yq_oPQBckF74Q4';
-
     this.googleAuth.getSheetData(spreadsheetId, range, apiKey).then(data => {
+      if (!data || !Array.isArray(data) || data.length === 0) {
+        return;
+      } 
+      //columns
       this.headers = data[0];
       this.sheetData = data.slice(1);
       const ratingIndex = this.headers.indexOf('Rating');
+      const nameIndex = this.headers.indexOf('Name');
+      const statusIndex = this.headers.indexOf('Status');
+      const specializationIndex = this.headers.indexOf('Specialization');
+      //stat grid
       this.totalAssociates = this.sheetData.length;
       this.topPerformers = this.sheetData.filter(row => row[ratingIndex] == 5 || row[ratingIndex] == 4).length;
       this.averagePerformers = this.sheetData.filter(row => row[ratingIndex] == 3).length;
       this.bottomPerformers = this.sheetData.filter(row => row[ratingIndex] == 2 || row[ratingIndex] == 1).length;
+
+      this.data = this.sheetData
+        .map(row => ({
+          name: row[nameIndex]?.trim(),
+          status: row[statusIndex]?.trim(),
+          specialization: row[specializationIndex]?.trim()
+        }))
+        .filter(row => row.name && row.status && row.specialization);
+      this.calculateCounts();
+    });
+    this.fetchTrainingSheetData();
+    this.cesDataService.getCesData().subscribe((data: CesData[]) => {
+      this.cesData = data;
     });
   }
 
-
-  async loadData() {
-
-    const spreadsheetId = '1H7LdfDNYhufySKJkQYcidL6cQbOVpFisUVZqG_bKBIE';
-
-    const range = 'TSR_LDAP_wise_Performance!B1:J13';
-
-    this.sheetData = await this.googleAuth.getSheetData(spreadsheetId, range, 'AIzaSyB2Wal4dub_mS231LVH2yq_oPQBckF74Q4');
-    console.log(this.sheetData);
+  showCesPopup = false;
+  openCesPopup() {
+    this.showCesPopup = true;
+  }
+  closeCesPopup() {
+    this.showCesPopup = false;
   }
 
+  async loadData() {
+    const spreadsheetId = '1mfnbjmMP6nUavrjlV5C_g7W1S4Hx72jABsfY-aQiT10';
+    const range = 'TSR_LDAP_wise_Performance!A1:D189';
+    this.sheetData = await this.googleAuth.getSheetData(spreadsheetId, range, 'AIzaSyB2Wal4dub_mS231LVH2yq_oPQBckF74Q4');
+  }
+
+  fetchTrainingSheetData() {
+    const spreadsheetId = '1mfnbjmMP6nUavrjlV5C_g7W1S4Hx72jABsfY-aQiT10';
+    const range = 'Training!A1:C21';
+    const apiKey = 'AIzaSyB2Wal4dub_mS231LVH2yq_oPQBckF74Q4';
+
+    this.googleAuth.getSheetData(spreadsheetId, range, apiKey).then(data => {
+      this.trainingSheetHeaders = data[0];
+      const nameIndex = this.trainingSheetHeaders.indexOf('Name');
+      const statusIndex = this.trainingSheetHeaders.indexOf('Status');
+      const rows = data.slice(1);
+      const specIndex = this.trainingSheetHeaders.indexOf('Specialization');
+
+      this.data = rows
+        .map(row => ({
+          name: row[nameIndex]?.trim(),
+          status: row[statusIndex]?.trim(),
+          specialization: row[specIndex]?.trim()
+        }))
+        .filter(row => row.name && row.status && row.specialization);
+
+      this.calculateCounts();
+    });
+  }
+
+  calculateCounts() {
+    const filtered = this.selectedSpecialization === 'All Specializations'
+      ? this.data
+      : this.data.filter(d =>
+        d.specialization.toLowerCase() === this.selectedSpecialization.toLowerCase()
+      );
+    this.nestedCount = filtered.filter(d => d.status?.toLowerCase() === 'nested').length;
+    this.readyCount = filtered.filter(d => d.status?.toLowerCase() === 'ready').length;
+    this.trainingCount = this.nestedCount + this.readyCount;
+    this.onboardingCount = filtered.filter(d => d.status?.toLowerCase() === 'onboarding').length;
+  }
   updateSiteData(): void {
     const data = this.siteDataService.getSiteData(this.selectedSite);
     this.siteStats = data;
   }
-
   updateSitePerformance(): void {
     this.updateSiteData();
   }
   selectedMission: string = '';
   missionData: { [key: string]: { name: string, score: number }[] } = {
-    'CES': [
-      { name: 'Compute', score: 5 },
-      { name: 'DevOps', score: 4 },
-      { name: 'Security', score: 5 },
-      { name: 'GKE', score: 5 },
-      { name: 'Networking', score: 5 },
-      { name: 'Databases', score: 4 },
-      { name: 'Data Analytics', score: 4 },
-      { name: 'AI/ML', score: 5 },
-      { name: 'Serverless', score: 5 },
-      { name: 'Storage', score: 4 }
-    ],
     'SDR': [
       { name: 'Compute', score: 5 },
       { name: 'DevOps', score: 4 },
@@ -170,9 +254,6 @@ export class DashboardComponent implements OnInit {
       { name: 'Serverless', score: 5 },
       { name: 'Storage', score: 4 }
     ],
-
-
-    // add more mappings as needed
   };
 
   showMissions(missionType: string) {
@@ -187,9 +268,7 @@ export class DashboardComponent implements OnInit {
       modal.classList.add('flex');
 
       missionTitle.textContent = missionType;
-
-      missionList.innerHTML = ''; // Clear previous content
-
+      missionList.innerHTML = '';
       const missions = this.missionData[missionType] || [];
 
       missions.forEach(item => {
@@ -210,15 +289,12 @@ export class DashboardComponent implements OnInit {
       });
     }
   }
-
-
   onSiteChange(site: string): void {
     this.selectedSite = site;
     this.updateSiteData();
   }
 
   closeModal() {
-    // Add your logic to close the modal here
     const modal = document.getElementById('missionModal');
     if (modal) {
       modal.classList.add('hidden');
@@ -228,21 +304,21 @@ export class DashboardComponent implements OnInit {
   showStatPopup = false;
   popupTitle = '';
   popupContent: string[] = [];
-  searchTerm: string = '';
-  filteredPopupContent: string[] = [];
-
-  onSearchAssociate() {
-    const term = this.searchTerm.toLowerCase();
-    this.filteredPopupContent = this.popupContent.filter(name =>
-      name.toLowerCase().includes(term)
-    );
-  }
 
   showPopup(type: string) {
     this.showStatPopup = true;
     this.searchTerm = '';
-    const nameIndex = this.headers.indexOf('Name');
-    const ratingIndex = this.headers.indexOf('Rating');
+
+    const nameIndex = this.headers.findIndex(h => h?.toLowerCase().trim() === 'name');
+    const ratingIndex = this.headers.findIndex(h => h?.toLowerCase().trim() === 'rating');
+
+    if (nameIndex === -1 || ratingIndex === -1) {
+      console.error('Name or Rating column not found. Headers:', this.headers);
+      this.popupContent = ['Error: Name/Rating header not found.'];
+      this.filteredPopupContent = [...this.popupContent];
+      return;
+    }
+
     let filtered: any[] = [];
 
     switch (type) {
@@ -280,14 +356,10 @@ export class DashboardComponent implements OnInit {
     }
     this.filteredPopupContent = [...this.popupContent];
   }
-
   closePopup() {
     this.showStatPopup = false;
   }
   filterStats(filterType: string) {
-    // Add your filtering logic here
-    // For now, just log the filter type
     console.log('Filtering stats by:', filterType);
-    // Example: you might update siteStats based on the filterType
   }
 }

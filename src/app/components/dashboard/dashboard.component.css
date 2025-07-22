@@ -179,6 +179,14 @@
 }
 
 
+.scrollable-list {
+  max-height: 16rem; /* 256px */
+  overflow-y: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+  padding: 0.5rem;
+}
+
 .banner {
   color: #fff;
   border-radius: 0.5rem; /* rounded-lg */
