@@ -16,11 +16,11 @@ interface CesData {
 }
 
 import { Component, OnInit } from '@angular/core';
-import { SiteDataService } from '../../services/site-data.service';
 import { GoogleAuthService } from '../../services/google-auth.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CesDataService } from '../../services/ces-data.service';
+import { SiteService } from '../../services/site-data.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -36,10 +36,13 @@ export class DashboardComponent implements OnInit {
   averagePerformers = 0;
   bottomPerformers = 0;
   constructor(
-    private siteDataService: SiteDataService,
+    // private siteDataService: SiteDataService,
     private googleAuth: GoogleAuthService,
-    private cesDataService: CesDataService
+    private cesDataService: CesDataService,
+    private siteService: SiteService
   ) { }
+  selectedSite: string = 'Select Site';
+
   selectedSpecialization: string = 'All Specializations';
   specializations: string[] = [
     'All Specializations',
@@ -56,7 +59,6 @@ export class DashboardComponent implements OnInit {
   ];
 
   siteStats: any;
-  selectedSite: string = 'Select Site';
   startDate: string = '';
   endDate: string = '';
   allItems: any[] = [];
@@ -93,6 +95,9 @@ export class DashboardComponent implements OnInit {
 
 
   ngOnInit(): void {
+    this.siteService.selectedSite$.subscribe(site => {
+      this.selectedSite = site ?? '';
+    });
     const spreadsheetId = '1mfnbjmMP6nUavrjlV5C_g7W1S4Hx72jABsfY-aQiT10';
     const range = 'TSR_LDAP_wise_Performance!A1:D189';
     const apiKey = 'AIzaSyB2Wal4dub_mS231LVH2yq_oPQBckF74Q4';
@@ -176,13 +181,6 @@ export class DashboardComponent implements OnInit {
     this.readyCount = filtered.filter(d => d.status?.toLowerCase() === 'ready').length;
     this.trainingCount = this.nestedCount + this.readyCount;
     this.onboardingCount = filtered.filter(d => d.status?.toLowerCase() === 'onboarding').length;
-  }
-  updateSiteData(): void {
-    const data = this.siteDataService.getSiteData(this.selectedSite);
-    this.siteStats = data;
-  }
-  updateSitePerformance(): void {
-    this.updateSiteData();
   }
   selectedMission: string = '';
   missionData: { [key: string]: { name: string, score: number }[] } = {
@@ -289,10 +287,6 @@ export class DashboardComponent implements OnInit {
       });
     }
   }
-  onSiteChange(site: string): void {
-    this.selectedSite = site;
-    this.updateSiteData();
-  }
 
   closeModal() {
     const modal = document.getElementById('missionModal');
@@ -362,4 +356,43 @@ export class DashboardComponent implements OnInit {
   filterStats(filterType: string) {
     console.log('Filtering stats by:', filterType);
   }
+
+  //my actions
+  supportability = [
+  "Set up a custom container for model serving",
+  "Request for training in GENAI",
+  "Review and update support documentation"
+];
+escalations = [
+  "Escalation 1: AI/ML - High Priority",
+  "Escalation 2: Serverless - Medium Priority",
+  "Escalation 3: Data Analytics - Low Priority"
+];
+teamGrowthPlan = [
+  "Conduct one-on-one meetings with team members",
+  "Identify skill gaps and training needs",
+  "Set individual performance goals"
+];
+
+showActionPopup = false;
+actionPopupTitle = '';
+actionPopupList: string[] = [];
+
+showActionDetails(type: string) {
+  if (type === 'Supportability') {
+    this.actionPopupTitle = 'Supportability';
+    this.actionPopupList = this.supportability;
+  } else if (type === 'Escalations Yet to be Reviewed') {
+    this.actionPopupTitle = 'Escalations Yet to be Reviewed';
+    this.actionPopupList = this.escalations;
+  } else if (type === 'Team Growth Plan') {
+    this.actionPopupTitle = 'Team Growth Plan';
+    this.actionPopupList = this.teamGrowthPlan;
+  }
+  this.showActionPopup = true;
+}
+
+closeActionPopup() {
+  this.showActionPopup = false;
+}
 }

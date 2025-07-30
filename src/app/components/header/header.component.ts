@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { SiteDataService } from '../../services/site-data.service';
+import { SiteService } from '../../services/site-data.service';
 
 @Component({
   selector: 'app-header',
@@ -16,12 +16,14 @@ export class HeaderComponent {
     'CGN-CBE',
   ];
 
-  constructor(private siteDataService: SiteDataService) {}
-
+  constructor(private siteService: SiteService) {}
+  onSiteChange(site: string) {
+  this.siteService.setSelectedSite(site);
+}
   updateSiteData(event: Event) {
     const selectElement = event.target as HTMLSelectElement;
     this.selectedSite = selectElement.value;
-    this.siteDataService.setSelectedSite(this.selectedSite);
+    this.siteService.setSelectedSite(this.selectedSite);
   }
 
   toggleMenu() {

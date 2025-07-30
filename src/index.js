@@ -24,11 +24,12 @@ app.get('/api/ces-data', async (req, res) =>{
       query: `
   SELECT 
     string_field_6 AS specialization, 
-    ROUND(AVG(SAFE_CAST(string_field_9 AS FLOAT64)), 2) AS avg_ces_score
-  FROM \elevate360-poc.ces_data_cgn.source\
-  WHERE SAFE_CAST(string_field_9 AS FLOAT64) IS NOT NULL
+    ROUND(AVG(SAFE_CAST(string_field_9 AS FLOAT64)), 2) AS avg_ces_score_percentage
+  FROM \`elevate360-poc.ces_data_cgn.source\`
+  WHERE string_field_8 = 'CGN - HYD' 
+    AND SAFE_CAST(string_field_9 AS FLOAT64) IS NOT NULL
   GROUP BY string_field_6
-  ORDER BY avg_ces_score DESC
+  ORDER BY avg_ces_score_percentage DESC
   LIMIT 10
   OFFSET 1
 `,
