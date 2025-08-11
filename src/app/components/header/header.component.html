@@ -1,28 +1,45 @@
-<header class="bg-white shadow px-6 py-4 flex justify-between items-center">
-  <h1 class="text-2xl font-bold text-blue-600">Elevate 360° - Site Ops Dashboard</h1>
+<header class="bg-white shadow px-6 py-4 flex items-center justify-between">
+  <h1 class="text-2xl font-bold text-blue-600 flex-shrink-0">Elevate 360° - Site Ops Dashboard</h1>
 
-  <div class="absolute left-1/2 transform -translate-x-1/2">
-    <div class="flex items-center gap-3">
-      <span class="text-blue-600 text-2xl">
-        <i class="fas fa-filter"></i>
-      </span>
-      <label for="siteFilter" class="text-lg font-bold text-gray-800">Select Site:</label>
-      <select id="siteFilter" class="text-lg font-semibold border-2 border-blue-400 rounded-xl px-4 py-2 bg-white shadow focus:outline-none focus:ring-4 focus:ring-blue-200 transition-all duration-200" (change)="updateSiteData($event)">
-        <option value="Select Site">Select Site</option>
-        <option value="CGN-HYD">CGN-HYD</option>
-        <option value="CGN-TLV">CGN-TLV</option>
-        <option value="CGN-BUH">CGN-BUH</option>
-        <option value="CGN-CBE">CGN-CBE</option>
-      </select>
+  <div class="flex-1 flex justify-center">
+    <div class="flex justify-between items-center gap-8">
+      <div class="flex items-center gap-3">
+        <span class="text-blue-600 text-2xl">
+          <i class="fas fa-filter"></i>
+        </span>
+        <span class="text-lg font-bold text-gray-800">Site Filter:</span>
+        <select 
+          class="text-lg font-semibold border-2 border-blue-400 rounded-xl px-4 py-2 bg-white shadow focus:outline-none focus:ring-4 focus:ring-blue-200 transition-all duration-200"
+          [(ngModel)]="selectedSite" 
+          (change)="onSiteChange()">
+          <option value="Select">All Sites</option>
+          <option value="CGN - HYD">CGN - HYD</option>
+          <option value="CGN - BUH">CGN - BUH</option>
+          <option value="CGN - BLR">CGN - BLR</option>
+          <option value="CGN - TLV">CGN - TLV</option>
+        </select>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <label for="premiumFilter" class="text-lg font-bold text-gray-800">Business Line:</label>
+        <select id="premiumFilter"
+          class="text-lg font-semibold border-2 border-blue-400 rounded-xl px-4 py-2 bg-white shadow focus:outline-none focus:ring-4 focus:ring-blue-200 transition-all duration-200"
+          [(ngModel)]="selectedBusinessline" (change)="onBusinessLineChange()">
+          <option value="Select">Select</option>
+          <option value="GCP Tech Premium">GCP Tech Premium</option>
+          <option value="GCP Tech Non-Premium">GCP Tech Non-Premium</option>
+        </select>
+      </div>
     </div>
   </div>
 
-  <div class="relative ml-auto">
+  <div class="relative ml-auto flex-shrink-0">
     <button (click)="toggleMenu()" class="flex items-center space-x-2 focus:outline-none">
       <img src="https://i.pravatar.cc/32?img=12" alt="Avatar" class="w-8 h-8 rounded-full border">
       <i class="fas fa-bars text-gray-700 text-lg ml-1"></i>
     </button>
-    <div id="menuDropdown" class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-md text-sm hidden z-50">
+    <div id="menuDropdown"
+      class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-md text-sm hidden z-50">
       <a href="#" class="block px-4 py-2 hover:bg-gray-100 text-gray-700">Dashboard</a>
       <a href="#" class="block px-4 py-2 hover:bg-gray-100 text-gray-700">My Learning</a>
       <a href="#" class="block px-4 py-2 hover:bg-gray-100 text-gray-700">Challenges</a>
@@ -30,3 +47,55 @@
     </div>
   </div>
 </header>
+
+
+<!-- <header class="bg-white shadow px-6 py-4 flex items-center justify-between">
+  <h1 class="text-2xl font-bold text-blue-600 flex-shrink-0">Elevate 360° - Site Ops Dashboard</h1>
+
+  <div class="flex-1 flex justify-center">
+    <div class="flex justify-between items-center gap-8">
+      <div class="flex items-center gap-3">
+        <span class="text-blue-600 text-2xl">
+          <i class="fas fa-filter"></i>
+        </span>
+        <span class="text-lg font-bold text-gray-800">Site Filter:</span>
+        
+  
+        <mat-form-field appearance="fill" class="w-[120px] custom-white-input">
+          <mat-label>Select Site</mat-label>
+          <mat-select [(ngModel)]="selectedSite" (selectionChange)="onSiteChange()">
+            <mat-option value="Select">All Sites</mat-option>
+            <mat-option value="CGN - HYD">CGN - HYD</mat-option>
+            <mat-option value="CGN - BUH">CGN - BUH</mat-option>
+            <mat-option value="CGN - BLR">CGN - BLR</mat-option>
+            <mat-option value="CGN - TLV">CGN - TLV</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div class="flex items-center gap-2">
+        <label for="premiumFilter" class="text-lg font-bold text-gray-800">Business Line:</label>
+        <select id="premiumFilter"
+          class="text-lg font-semibold border-2 border-blue-400 rounded-xl px-4 py-2 bg-white shadow focus:outline-none focus:ring-4 focus:ring-blue-200 transition-all duration-200"
+          [(ngModel)]="selectedBusinessline" (change)="onBusinessLineChange()">
+          <option value="Select">Select</option>
+          <option value="GCP Tech Premium">GCP Tech Premium</option>
+          <option value="GCP Tech Non-Premium">GCP Tech Non-Premium</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="relative ml-auto flex-shrink-0">
+    <button (click)="toggleMenu()" class="flex items-center space-x-2 focus:outline-none">
+      <img src="https://i.pravatar.cc/32?img=12" alt="Avatar" class="w-8 h-8 rounded-full border">
+      <i class="fas fa-bars text-gray-700 text-lg ml-1"></i>
+    </button>
+    <div id="menuDropdown"
+      class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-md text-sm hidden z-50">
+      <a href="#" class="block px-4 py-2 hover:bg-gray-100 text-gray-700">Dashboard</a>
+      <a href="#" class="block px-4 py-2 hover:bg-gray-100 text-gray-700">My Learning</a>
+      <a href="#" class="block px-4 py-2 hover:bg-gray-100 text-gray-700">Challenges</a>
+      <a href="#" class="block px-4 py-2 hover:bg-gray-100 text-gray-700">Logout</a>
+    </div>
+  </div>
+</header> -->

@@ -29,10 +29,10 @@ export class AppComponent implements OnInit{
   constructor(private cesDataService: CesDataService) {}
 
   ngOnInit() {
-    this.cesDataService.getCesData().subscribe(data => {
-      this.cesData = data;
-      console.log('CES Data from backend:', data);
-    });
+    // this.cesDataService.getCesData().subscribe(data => {
+    //   this.cesData = data;
+    //   console.log('CES Data from backend:', data);
+    // });
   }
  
 

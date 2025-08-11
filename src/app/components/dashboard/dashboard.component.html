@@ -4,7 +4,7 @@
     <div>
       <h1 class="text-white text-xl font-bold mb-2">Hey there!</h1>
       <p class="text-white text-base mb-2">Kudos, you are doing an amazing job!</p>
-       <p class="text-white italic text-base">
+      <p class="text-white italic text-base">
         Site: <span *ngIf="selectedSite">{{ selectedSite }}</span>
 
       </p>
@@ -13,33 +13,43 @@
       <img src="motivation.png" class="h-32" alt="Motivation" />
     </div>
   </section>
-
-  
   <!-- calender filter -->
-  <div class="w-full flex justify-between items-center my-4">
+  <div class="flex items-center justify-between w-full px-4 py-3">
 
     <div class="flex items-center gap-3">
       <label class="text-lg font-bold text-gray-800">Select Time Zone:</label>
-      <select  class="text-lg font-semibold border-2 border-blue-400 rounded-xl px-4 py-2 bg-white shadow focus:outline-none focus:ring-4 focus:ring-blue-200 transition-all duration-200">
-        <option value="Select Site">Select Zone</option>
-        <option value="CGN-HYD">Apac</option>
-        <option value="CGN-TLV">Emea</option>
-        <option value="CGN-BUH">Amer</option>
+      <select
+        class="text-lg font-semibold border-2 border-blue-400 rounded-xl px-4 py-2 bg-white shadow focus:outline-none focus:ring-4 focus:ring-blue-200 transition-all duration-200">
+        <option value="Select Zone">Select Zone</option>
+        <option value="apac">APAC</option>
+        <option value="emea">EMEA</option>
+        <option value="amer">AMER</option>
       </select>
     </div>
 
-    <div class="date-filter-container bg-gray-100 flex items-center gap-2 rounded-lg p-1">
-      <label>
-        Start Date:
-        <input type="date" [(ngModel)]="startDate" class="date-input">
-      </label>
-      <label>
-        End Date:
-        <input type="date" [(ngModel)]="endDate" class="date-input">
-      </label>
-      <!-- <button (click)="filterByDate()" class="filter-btn">Filter</button> -->
+    <div class="flex items-center gap-4 p-3 bg-grey rounded-lg  max-w-fit">
+      <mat-form-field>
+        <mat-label>Start Date</mat-label>
+        <input matInput [matDatepicker]="startPicker" [(ngModel)]="startDate" (dateChange)="applyFilter()">
+        <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+        <mat-datepicker #startPicker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>End Date</mat-label>
+        <input matInput [matDatepicker]="endPicker" [(ngModel)]="endDate" (dateChange)="applyFilter()">
+        <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+        <mat-datepicker #endPicker></mat-datepicker>
+      </mat-form-field>
+
+      <button mat-raised-button (click)="applyFilter()"
+        class="bg-blue-500 hover:bg-blue-600 text-white rounded-full h-10 px-5 text-sm shadow-md transition-colors duration-200">
+        Apply Filter
+      </button>
     </div>
+
   </div>
+
   <section class="grid grid-cols-1 md:grid-cols-4 gap-8 mt-2 pr-8">
     <!-- <p>*ngIf="sheetData">{{ sheetData | json }}</p> -->
     <div class="bg-white shadow rounded-lg p-4 border-l-4 border-blue-500 ml-4 cursor-pointer"
@@ -323,7 +333,8 @@
     <ul class="space-y-2 text-sm text-gray-700 max-h-72 overflow-y-auto">
       <li *ngFor="let row of cesData" class="flex justify-between items-center bg-blue-100 rounded px-4 py-2">
         <span>{{ row.specialization }}</span>
-<span class="font-bold text-blue-700">{{ row.avg_ces_score_percentage }}%</span>      </li>
+        <span class="font-bold text-blue-700">{{ row.avg_ces_score_percentage }}%</span>
+      </li>
     </ul>
   </div>
 </div>

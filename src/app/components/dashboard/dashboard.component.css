@@ -16,10 +16,6 @@
     color: #6b7280;
 }
 
-/* .text-blue-100 {
-    background-color: #bfdbfe;
-} */
-
 .text-blue-200 {
     color: #60a5fa;
 }
@@ -207,56 +203,50 @@
     flex-direction: row;
   }
 }
-
-/* date filter */
-.right-align-container {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end; /* Aligns content to the right */
-  width: 100%;
+/* filter - calendar */
+.custom-white-input.mat-mdc-form-field-appearance-fill .mat-mdc-text-field-wrapper {
+  background-color: white !important; /* Ensure a solid white background */
+  border-radius: 8px !important; /* Apply desired border radius */
+  border: 1px solid #d0d0d0 !important; /* Add a subtle gray border */
+  box-shadow: none !important; /* Remove any default shadow */
+  height: 48px !important; /* Set a consistent height */
+  box-sizing: border-box !important; /* Include padding/border in height */
+  padding: 0 16px !important; /* Adjust horizontal padding inside the box */
 }
-
-.date-filter-container {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-  /* margin-bottom: 1rem;
-  padding: 1rem; */
-  border-radius: 8px;
+.custom-white-input.mat-mdc-form-field-appearance-fill .mat-mdc-form-field-underline {
+  display: none !important;
 }
-
-.date-input {
-  padding: 0.5rem;
-  border: 1px solid #bdbdbd;
-  border-radius: 4px;
+.custom-white-input .mat-mdc-form-field-infix {
+  padding: 12px 0 !important; /* Vertical padding to center text */
+  min-height: 48px !important; /* Match overall height */
+  display: flex !important;
+  align-items: center !important;
 }
-
-.filter-btn {
-  background: #1976d2;
-  color: #fff;
-  border: none;
-  padding: 0.5rem 1.2rem;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background 0.2s;
+.custom-white-input .mat-mdc-form-field-label {
+  color: rgba(0, 0, 0, 0.6) !important; /* Default label color */
+  top: 50% !important; /* Center vertically for initial position */
+  transform: translateY(-50%) !important; /* Adjust for actual centering */
+  left: 16px !important; /* Align with input padding */
+  transition: transform 0.2s ease-out, font-size 0.2s ease-out, top 0.2s ease-out !important;
 }
-
-.filter-btn:hover {
-  background: #1565c0;
+.custom-white-input .mat-mdc-form-field-label.mdc-floating-label--float {
+  transform: translateY(-100%) scale(0.75) !important; /* Adjust to float above the box */
+  top: -8px !important; /* Move it outside the box */
+  left: 12px !important; /* Slightly indent the floating label */
+  background-color: white; /* Optional: background for label if it overlaps border */
+  padding: 0 4px; /* Optional: padding for the background */
+  z-index: 1; /* Ensure label is on top */
 }
-
-.filtered-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  width: 100%;
-  text-align: right;
+.custom-white-input .mat-mdc-form-field-icon-suffix {
+  align-self: center !important;
+  padding-right: 0 !important;
+  height: 100% !important;
 }
-
-.right{
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
+.custom-white-input .mat-mdc-form-field-suffix .mat-mdc-button {
+  padding: 0 !important;
+  min-width: unset !important;
+}
+.custom-white-input .mat-mdc-form-field-subscript-wrapper {
+  height: 0 !important;
+  overflow: hidden !important;
 }

@@ -20,14 +20,21 @@ import { GoogleAuthService } from '../../services/google-auth.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CesDataService } from '../../services/ces-data.service';
-import { SiteService } from '../../services/site-data.service';
-import { GsheetService } from '../../gsheet.service';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { HttpClient } from '@angular/common/http';
+import { MatNativeDateModule } from '@angular/material/core';
+import { FilterService } from '../../services/filter.service';
+
+
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  providers: [GoogleAuthService, GsheetService],
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  // providers: [GoogleAuthService, CesDataService, SiteService, FilterService],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, MatDatepickerModule, 
+    MatFormFieldModule, MatInputModule, MatNativeDateModule],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
@@ -36,15 +43,19 @@ export class DashboardComponent implements OnInit {
   topPerformers = 0;
   averagePerformers = 0;
   bottomPerformers = 0;
-  rawData: string[][] = [];
   constructor(
-    // private siteDataService: SiteDataService,
+    private http: HttpClient, 
     private googleAuth: GoogleAuthService,
     private cesDataService: CesDataService,
-    private siteService: SiteService,
-    private sheetService: GsheetService
-  ) { }
-  selectedSite: string = 'Select Site';
+    private filterService: FilterService
+  ) {
+
+    // Set a default date range, for example, the last 30 days
+    this.startDate.setMonth(this.startDate.getMonth() - 1);
+   }
+  selectedSite: string = 'Select';
+  selectedBusinessline: string = '';
+
 
   selectedSpecialization: string = 'All Specializations';
   specializations: string[] = [
@@ -62,8 +73,8 @@ export class DashboardComponent implements OnInit {
   ];
 
   siteStats: any;
-  startDate: string = '';
-  endDate: string = '';
+  startDate: Date = new Date();  
+  endDate: Date = new Date();
   allItems: any[] = [];
   filteredItems: any[] = [];
   searchTerm: string = '';
@@ -86,10 +97,20 @@ export class DashboardComponent implements OnInit {
       name.toLowerCase().includes(term)
     );
   }
-
+  
   ngOnInit(): void {
-    this.siteService.selectedSite$.subscribe(site => {
-      this.selectedSite = site ?? '';
+   this.filterService.currentSite.subscribe(site => {
+
+    console.log(`DASHBOARD: Received new site from service: '${site}'`);
+      this.selectedSite = site;
+      this.applyFilter();
+    });
+    this.filterService.currentBusinessLine.subscribe(businessLine => {
+
+      console.log(`DASHBOARD: Received new business line from service: '${businessLine}'`);
+
+      this.selectedBusinessline = businessLine;
+      this.applyFilter(); // Call the filter function when the business line changes
     });
     const spreadsheetId = '1mfnbjmMP6nUavrjlV5C_g7W1S4Hx72jABsfY-aQiT10';
     const range = 'TSR_LDAP_wise_Performance!A1:D189';
@@ -97,7 +118,7 @@ export class DashboardComponent implements OnInit {
     this.googleAuth.getSheetData(spreadsheetId, range, apiKey).then(data => {
       if (!data || !Array.isArray(data) || data.length === 0) {
         return;
-      }
+      } 
       //columns
       this.headers = data[0];
       this.sheetData = data.slice(1);
@@ -121,51 +142,60 @@ export class DashboardComponent implements OnInit {
       this.calculateCounts();
     });
     this.fetchTrainingSheetData();
-    this.cesDataService.getCesData().subscribe((data: CesData[]) => {
-      this.cesData = data;
-    });
+    // this.cesDataService.getCesData().subscribe((data: CesData[]) => {
+    //   this.cesData = data;
+    // });
+  }
 
-    //for date filtering
-    this.sheetService.fetchSheetData().subscribe(data => {
-      this.rawData = data;
-      console.log('Fetched Sheet Data:', this.rawData);
-    //   //date wise filtering
-    //   segmentTables(data: string[][]) {
-    //     const monthlyStart = data.findIndex(row => row[0]?.toLowerCase()?.includes('monthly summary')) + 1;
-    //     const weeklyStart = data.findIndex(row => row[0]?.toLowerCase()?.includes('weekly summary')) + 1;
-    //     const daywiseStart = data.findIndex(row => row[0]?.toLowerCase()?.includes('daywise summary')) + 1;
+  applyFilter() {
 
-    //     const monthlyData = data.slice(monthlyStart + 1, weeklyStart - 1);
-    //     const weeklyData = data.slice(weeklyStart + 1, daywiseStart - 1);
-    //     const daywiseData = data.slice(daywiseStart + 1);
+    // Guard clause to prevent running with invalid dates
+    if (!this.startDate || !this.endDate) {
+      return;
+    }
+    if (this.startDate > this.endDate) {
+      console.error('Start date cannot be after end date.');
+      return;
+    }
+  const formattedStart = this.formatDate(this.startDate);
+  const formattedEnd = this.formatDate(this.endDate);
 
-    //     return {
-    //       monthly: this.transformToObjects(data[monthlyStart], monthlyData),
-    //       weekly: this.transformToObjects(data[weeklyStart], weeklyData),
-    //       daywise: this.transformToObjects(data[daywiseStart], daywiseData),
-    //     };
-    //   }
-    //   filterByDate(data: any[], dateField: string) {
-    //     return data.filter(row => {
-    //       const rowDate = new Date(row[dateField]);
-    //       return (!this.startDate || rowDate >= new Date(this.startDate)) &&
-    //         (!this.endDate || rowDate <= new Date(this.endDate));
-    //     });
-    //   }
+  console.log('API CALL: Preparing to send these params:' +
+    ` Start Date: ${formattedStart}, End Date: ${formattedEnd}, Business Line: ${this.selectedBusinessline}, Site: ${this.selectedSite}`);
 
 
-    //   transformToObjects(headers: string[], rows: string[][]) {
-    //     return rows.map(row => {
-    //       const obj: any = {};
-    //       headers.forEach((h, i) => obj[h] = row[i]);
-    //       return obj;
-    //     });
-    //   }
-   });
+     const params= {
+      startDate: formattedStart,
+      endDate: formattedEnd,
+      businessLine: this.selectedBusinessline,
+      site: this.selectedSite 
+
+    };
+
+  this.http.get<any>('http://localhost:3001/api/ces-data', {
+    params: {
+      startDate: formattedStart,
+      endDate: formattedEnd,
+      businessLine: this.selectedBusinessline,
+      site: this.selectedSite
+    }
+  }).subscribe({
+    next: (response) => {
+      console.log('API CALL: Succeeded. Response:', response);
+      // You can assign response to a variable to use in your template
+      this.cesData = response;
+    },
+    error: (error) => console.error('Error fetching data:', error)
+  });
+}
+
+  formatDate(date: Date): string {
+    return date.toISOString().split('T')[0]; // "YYYY-MM-DD"
   }
 
   showCesPopup = false;
   openCesPopup() {
+      this.applyFilter();
     this.showCesPopup = true;
   }
   closeCesPopup() {
@@ -390,40 +420,40 @@ export class DashboardComponent implements OnInit {
 
   //my actions
   supportability = [
-    "Set up a custom container for model serving",
-    "Request for training in GENAI",
-    "Review and update support documentation"
-  ];
-  escalations = [
-    "Escalation 1: AI/ML - High Priority",
-    "Escalation 2: Serverless - Medium Priority",
-    "Escalation 3: Data Analytics - Low Priority"
-  ];
-  teamGrowthPlan = [
-    "Conduct one-on-one meetings with team members",
-    "Identify skill gaps and training needs",
-    "Set individual performance goals"
-  ];
+  "Set up a custom container for model serving",
+  "Request for training in GENAI",
+  "Review and update support documentation"
+];
+escalations = [
+  "Escalation 1: AI/ML - High Priority",
+  "Escalation 2: Serverless - Medium Priority",
+  "Escalation 3: Data Analytics - Low Priority"
+];
+teamGrowthPlan = [
+  "Conduct one-on-one meetings with team members",
+  "Identify skill gaps and training needs",
+  "Set individual performance goals"
+];
 
-  showActionPopup = false;
-  actionPopupTitle = '';
-  actionPopupList: string[] = [];
+showActionPopup = false;
+actionPopupTitle = '';
+actionPopupList: string[] = [];
 
-  showActionDetails(type: string) {
-    if (type === 'Supportability') {
-      this.actionPopupTitle = 'Supportability';
-      this.actionPopupList = this.supportability;
-    } else if (type === 'Escalations Yet to be Reviewed') {
-      this.actionPopupTitle = 'Escalations Yet to be Reviewed';
-      this.actionPopupList = this.escalations;
-    } else if (type === 'Team Growth Plan') {
-      this.actionPopupTitle = 'Team Growth Plan';
-      this.actionPopupList = this.teamGrowthPlan;
-    }
-    this.showActionPopup = true;
+showActionDetails(type: string) {
+  if (type === 'Supportability') {
+    this.actionPopupTitle = 'Supportability';
+    this.actionPopupList = this.supportability;
+  } else if (type === 'Escalations Yet to be Reviewed') {
+    this.actionPopupTitle = 'Escalations Yet to be Reviewed';
+    this.actionPopupList = this.escalations;
+  } else if (type === 'Team Growth Plan') {
+    this.actionPopupTitle = 'Team Growth Plan';
+    this.actionPopupList = this.teamGrowthPlan;
   }
+  this.showActionPopup = true;
+}
 
-  closeActionPopup() {
-    this.showActionPopup = false;
-  }
+closeActionPopup() {
+  this.showActionPopup = false;
+}
 }
