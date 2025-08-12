@@ -43,6 +43,26 @@ export class DashboardComponent implements OnInit {
   topPerformers = 0;
   averagePerformers = 0;
   bottomPerformers = 0;
+  messages: string[] = [
+  'Kudos, you are doing an amazing job!',
+  'Great work! Keep up the momentum!',
+  'You’re making excellent progress!',
+  'Fantastic effort! Your dedication shows.',
+  'Keep shining! Your work is incredible.',
+  'Believe you can and you’re halfway there.',
+  'The only way to do great work is to love what you do.',
+  'Every moment is a fresh beginning.',
+  'You are capable of more than you know.'
+];
+  
+  // Variable to hold the current message
+  currentMessage: string = '';
+  // Method to select a random message from the array
+  selectRandomMessage() {
+    const randomIndex = Math.floor(Math.random() * this.messages.length);
+    this.currentMessage = this.messages[randomIndex];
+  }
+
   constructor(
     private http: HttpClient, 
     private googleAuth: GoogleAuthService,
@@ -99,6 +119,7 @@ export class DashboardComponent implements OnInit {
   }
   
   ngOnInit(): void {
+    this.selectRandomMessage();
    this.filterService.currentSite.subscribe(site => {
 
     console.log(`DASHBOARD: Received new site from service: '${site}'`);
