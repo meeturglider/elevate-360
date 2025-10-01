@@ -1,3 +1,17 @@
+import { Component, OnInit } from '@angular/core';
+import { GoogleAuthService } from '../../services/google-auth.service';
+import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { CesDataService } from '../../services/ces-data.service';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { HttpClient } from '@angular/common/http';
+import { MatNativeDateModule } from '@angular/material/core';
+import { FilterService } from '../../services/filter.service';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome'; // Import the module
+
+
 interface SiteStats {
   associates: number;
   top: number;
@@ -15,26 +29,12 @@ interface CesData {
   string_field_9: string;
 }
 
-import { Component, OnInit } from '@angular/core';
-import { GoogleAuthService } from '../../services/google-auth.service';
-import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { CesDataService } from '../../services/ces-data.service';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { HttpClient } from '@angular/common/http';
-import { MatNativeDateModule } from '@angular/material/core';
-import { FilterService } from '../../services/filter.service';
-
-
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  // providers: [GoogleAuthService, CesDataService, SiteService, FilterService],
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, MatDatepickerModule, 
-    MatFormFieldModule, MatInputModule, MatNativeDateModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, MatDatepickerModule,
+    MatFormFieldModule, MatInputModule, MatNativeDateModule, FontAwesomeModule], 
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
@@ -43,18 +43,44 @@ export class DashboardComponent implements OnInit {
   topPerformers = 0;
   averagePerformers = 0;
   bottomPerformers = 0;
+
+  messages: string[] = [
+    'Kudos, you are doing an amazing job!',
+    'Great work! Keep up the momentum!',
+    'You’re making excellent progress!',
+    'Fantastic effort! Your dedication shows.',
+    'Keep shining! Your work is incredible.',
+    'Success is the sum of small efforts.',
+    'Teamwork makes the dream work.',
+    'Believe you can and you’re halfway there.',
+    'The secret of getting ahead is getting started.',
+    'Your hard work is paying off!',
+    'The best way to predict the future is to create it.',
+    'Every moment is a fresh beginning.'
+  ];
+
+  currentMessage: string = '';
+
+
+  getNextMessage() {
+    let currentIndex = parseInt(localStorage.getItem('messageIndex') || '0', 10);
+    this.currentMessage = this.messages[currentIndex];
+    currentIndex++;
+    if (currentIndex >= this.messages.length) {
+      currentIndex = 0;
+    }
+    localStorage.setItem('messageIndex', currentIndex.toString());
+  }
+
   constructor(
-    private http: HttpClient, 
+    private http: HttpClient,
     private googleAuth: GoogleAuthService,
     private cesDataService: CesDataService,
     private filterService: FilterService
   ) {
-
-    // Set a default date range, for example, the last 30 days
-    this.startDate.setMonth(this.startDate.getMonth() - 1);
-   }
+  }
   selectedSite: string = 'Select';
-  selectedBusinessline: string = '';
+  selectedBusinessline: string = 'Select';
 
 
   selectedSpecialization: string = 'All Specializations';
@@ -73,8 +99,10 @@ export class DashboardComponent implements OnInit {
   ];
 
   siteStats: any;
-  startDate: Date = new Date();  
-  endDate: Date = new Date();
+  startDate!: Date;
+  endDate!: Date;
+  minDate!: Date;
+  maxDate!: Date;
   allItems: any[] = [];
   filteredItems: any[] = [];
   searchTerm: string = '';
@@ -97,11 +125,17 @@ export class DashboardComponent implements OnInit {
       name.toLowerCase().includes(term)
     );
   }
-  
-  ngOnInit(): void {
-   this.filterService.currentSite.subscribe(site => {
 
-    console.log(`DASHBOARD: Received new site from service: '${site}'`);
+  ngOnInit(): void {
+    this.minDate = new Date(Date.UTC(2025, 0, 1));
+    this.maxDate = new Date();
+    this.startDate = this.minDate;
+    this.endDate = this.maxDate;
+
+    this.getNextMessage();
+    this.filterService.currentSite.subscribe(site => {
+
+      console.log(`DASHBOARD: Received new site from service: '${site}'`);
       this.selectedSite = site;
       this.applyFilter();
     });
@@ -110,7 +144,7 @@ export class DashboardComponent implements OnInit {
       console.log(`DASHBOARD: Received new business line from service: '${businessLine}'`);
 
       this.selectedBusinessline = businessLine;
-      this.applyFilter(); // Call the filter function when the business line changes
+      this.applyFilter();
     });
     const spreadsheetId = '1mfnbjmMP6nUavrjlV5C_g7W1S4Hx72jABsfY-aQiT10';
     const range = 'TSR_LDAP_wise_Performance!A1:D189';
@@ -118,7 +152,7 @@ export class DashboardComponent implements OnInit {
     this.googleAuth.getSheetData(spreadsheetId, range, apiKey).then(data => {
       if (!data || !Array.isArray(data) || data.length === 0) {
         return;
-      } 
+      }
       //columns
       this.headers = data[0];
       this.sheetData = data.slice(1);
@@ -142,14 +176,10 @@ export class DashboardComponent implements OnInit {
       this.calculateCounts();
     });
     this.fetchTrainingSheetData();
-    // this.cesDataService.getCesData().subscribe((data: CesData[]) => {
-    //   this.cesData = data;
-    // });
   }
 
   applyFilter() {
 
-    // Guard clause to prevent running with invalid dates
     if (!this.startDate || !this.endDate) {
       return;
     }
@@ -157,49 +187,109 @@ export class DashboardComponent implements OnInit {
       console.error('Start date cannot be after end date.');
       return;
     }
-  const formattedStart = this.formatDate(this.startDate);
-  const formattedEnd = this.formatDate(this.endDate);
+    const formattedStart = this.formatDate(this.startDate);
+    const formattedEnd = this.formatDate(this.endDate);
 
-  console.log('API CALL: Preparing to send these params:' +
-    ` Start Date: ${formattedStart}, End Date: ${formattedEnd}, Business Line: ${this.selectedBusinessline}, Site: ${this.selectedSite}`);
+    console.log('API CALL: Preparing to send these params:' +
+      ` Start Date: ${formattedStart}, End Date: ${formattedEnd}, Business Line: ${this.selectedBusinessline}, Site: ${this.selectedSite}`);
 
 
-     const params= {
-      startDate: formattedStart,
-      endDate: formattedEnd,
-      businessLine: this.selectedBusinessline,
-      site: this.selectedSite 
-
-    };
-
-  this.http.get<any>('http://localhost:3001/api/ces-data', {
-    params: {
+    const params = {
       startDate: formattedStart,
       endDate: formattedEnd,
       businessLine: this.selectedBusinessline,
       site: this.selectedSite
-    }
-  }).subscribe({
-    next: (response) => {
-      console.log('API CALL: Succeeded. Response:', response);
-      // You can assign response to a variable to use in your template
-      this.cesData = response;
-    },
-    error: (error) => console.error('Error fetching data:', error)
-  });
-}
+
+    };
+
+    // this.http.get<any>('http://localhost:3001/api/ces-data', {
+    //   params: {
+    //     startDate: formattedStart,
+    //     endDate: formattedEnd,
+    //     businessLine: this.selectedBusinessline,
+    //     site: this.selectedSite
+    //   }
+    // }).subscribe({
+    //   next: (response) => {
+    //     console.log('API CALL: Succeeded. Response:', response);
+    //     // You can assign response to a variable to use in your template
+    //     this.cesData = response;
+    //   },
+    //   error: (error) => console.error('Error fetching data:', error)
+    // });
+  }
 
   formatDate(date: Date): string {
-    return date.toISOString().split('T')[0]; // "YYYY-MM-DD"
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
   showCesPopup = false;
   openCesPopup() {
-      this.applyFilter();
+    this.applyFilter();
     this.showCesPopup = true;
   }
   closeCesPopup() {
     this.showCesPopup = false;
+  }
+
+  showSdrPopup = false;
+  sdrPopupData: { specialization: string, sdr_count: number }[] = [];
+  sdrPopupTitle = 'SDR by Specialization';
+
+  openSdrPopup() {
+  this.showSdrPopup = true;
+  this.http.get<any>('http://localhost:3001/api/sdr-by-specialization', {
+    params: {
+      startDate: this.formatDate(this.startDate),
+      endDate: this.formatDate(this.endDate),
+      businessLine: this.selectedBusinessline,
+      site: this.selectedSite
+    }
+  }).subscribe({
+    next: (data) => {
+      console.log('SDR API response:', data);
+      this.sdrPopupData = data;
+    },
+    error: (error) => {
+      console.error('Error fetching SDR data:', error);
+      this.sdrPopupData = [];
+    }
+  });
+  }
+  closeSdrPopup() {
+    this.showSdrPopup = false;
+  }
+  //esc_rate
+  showEscalationPopup = false;
+  escalationPopupData: { site: string, total_escalation: number, total_closed_volume: number, escalation_rate: number }[] = [];
+  escalationPopupTitle = 'Escalation Rate';
+
+  openEscalationPopup() {
+  this.showEscalationPopup = true;
+  this.http.get<any>('http://localhost:3001/api/escalation-rate', {
+    params: {
+      startDate: this.formatDate(this.startDate),
+      endDate: this.formatDate(this.endDate),
+      businessLine: this.selectedBusinessline,
+      site: this.selectedSite
+    }
+  }).subscribe({
+    next: (data) => {
+      console.log('Escalation API response:', data);
+      this.escalationPopupData = [data];
+    },
+    error: (error) => {
+      console.error('Error fetching escalation rate data:', error);
+      this.escalationPopupData = [];
+    }
+  });
+}
+
+  closeEscalationPopup() {
+    this.showEscalationPopup = false;
   }
 
   async loadData() {
@@ -245,22 +335,6 @@ export class DashboardComponent implements OnInit {
   }
   selectedMission: string = '';
   missionData: { [key: string]: { name: string, score: number }[] } = {
-    'SDR': [
-      { name: 'Compute', score: 5 },
-      { name: 'DevOps', score: 4 },
-      { name: 'Security', score: 5 },
-      { name: 'GKE', score: 5 },
-      { name: 'Networking', score: 5 },
-      { name: 'Databases', score: 4 },
-      { name: 'Data Analytics', score: 4 },
-      { name: 'AI/ML', score: 5 },
-      { name: 'Serverless', score: 5 },
-      { name: 'Storage', score: 4 }
-    ],
-    'Escalation Rate': [
-      { name: 'Preventable Escalations', score: 3 },
-      { name: 'Non-Preventable Escalations', score: 2 },
-    ],
     'Quality': [
       { name: 'Compute', score: 5 },
       { name: 'DevOps', score: 4 },
@@ -420,40 +494,41 @@ export class DashboardComponent implements OnInit {
 
   //my actions
   supportability = [
-  "Set up a custom container for model serving",
-  "Request for training in GENAI",
-  "Review and update support documentation"
-];
-escalations = [
-  "Escalation 1: AI/ML - High Priority",
-  "Escalation 2: Serverless - Medium Priority",
-  "Escalation 3: Data Analytics - Low Priority"
-];
-teamGrowthPlan = [
-  "Conduct one-on-one meetings with team members",
-  "Identify skill gaps and training needs",
-  "Set individual performance goals"
-];
+    "Set up a custom container for model serving",
+    "Request for training in GENAI",
+    "Review and update support documentation"
+  ];
+  escalations = [
+    "Escalation 1: AI/ML - High Priority",
+    "Escalation 2: Serverless - Medium Priority",
+    "Escalation 3: Data Analytics - Low Priority"
+  ];
+  teamGrowthPlan = [
+    "Conduct one-on-one meetings with team members",
+    "Identify skill gaps and training needs",
+    "Set individual performance goals"
+  ];
 
-showActionPopup = false;
-actionPopupTitle = '';
-actionPopupList: string[] = [];
+  showActionPopup = false;
+  actionPopupTitle = '';
+  actionPopupList: string[] = [];
 
-showActionDetails(type: string) {
-  if (type === 'Supportability') {
-    this.actionPopupTitle = 'Supportability';
-    this.actionPopupList = this.supportability;
-  } else if (type === 'Escalations Yet to be Reviewed') {
-    this.actionPopupTitle = 'Escalations Yet to be Reviewed';
-    this.actionPopupList = this.escalations;
-  } else if (type === 'Team Growth Plan') {
-    this.actionPopupTitle = 'Team Growth Plan';
-    this.actionPopupList = this.teamGrowthPlan;
+  showActionDetails(type: string) {
+    if (type === 'Supportability') {
+      this.actionPopupTitle = 'Supportability';
+      this.actionPopupList = this.supportability;
+    } else if (type === 'Escalations Yet to be Reviewed') {
+      this.actionPopupTitle = 'Escalations Yet to be Reviewed';
+      this.actionPopupList = this.escalations;
+    } else if (type === 'Team Growth Plan') {
+      this.actionPopupTitle = 'Team Growth Plan';
+      this.actionPopupList = this.teamGrowthPlan;
+    }
+    this.showActionPopup = true;
   }
-  this.showActionPopup = true;
+
+  closeActionPopup() {
+    this.showActionPopup = false;
+  }
 }
 
-closeActionPopup() {
-  this.showActionPopup = false;
-}
-}

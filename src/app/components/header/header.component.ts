@@ -33,11 +33,6 @@ export class HeaderComponent {
 
     this.filterService.setBusinessLine(this.selectedBusinessline);
   }
-  // updateSiteData(event: Event) {
-  //   const selectElement = event.target as HTMLSelectElement;
-  //   this.selectedSite = selectElement.value;
-  //   this.siteService.setSelectedSite(this.selectedSite);
-  // }
 
   toggleMenu() {
     const dropdown = document.getElementById("menuDropdown");

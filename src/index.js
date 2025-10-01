@@ -19,53 +19,73 @@ const bigquery = new BigQuery({
   scopes: SCOPES,
 });
 
-app.get('/api/ces-data', async (req, res) => {
-  // This correctly receives all four parameters
+app.get('/api/sdr-by-specialization', async (req, res) => {
   const { startDate, endDate, businessLine, site } = req.query;
-
-  console.log('Received request with params:', { startDate, endDate, businessLine, site });
-
-  if (!startDate || !endDate) {
-    return res.status(400).json({ error: 'startDate and endDate are required' });
-  }
-
-  // This robustly builds the filter conditions
-  const filters = [
-    "SAFE_CAST(string_field_9 AS FLOAT64) IS NOT NULL",
-    `PARSE_DATE('%Y-%m-%d', string_field_4) BETWEEN DATE('${startDate}') AND DATE('${endDate}')`
+  let filters = [
+    "string_field_18 = 'TRUE'",
+    "PARSE_DATE('%m/%d/%Y', string_field_4) BETWEEN @startDate AND @endDate"
   ];
-
+  const params = { startDate, endDate };
   if (site && site !== 'Select') {
-    // Use TRIM() for a bulletproof comparison against whitespace
-    filters.push(`TRIM(string_field_8) = '${site.trim()}'`);
+    filters.push("TRIM(string_field_14) = @site");
+    params.site = site.trim();
   }
-
   if (businessLine && businessLine !== 'Select') {
-    filters.push(`string_field_5 = '${businessLine.trim()}'`);
+    filters.push("string_field_5 = @businessLine");
+    params.businessLine = businessLine.trim();
   }
-
   const whereClause = filters.join(' AND ');
-
   const query = `
     SELECT
-      string_field_6 AS specialization,
-      ROUND(AVG(SAFE_CAST(string_field_9 AS FLOAT64)), 2) AS avg_ces_score_percentage
+      string_field_10 AS specialization,
+      COUNT(*) AS sdr_count 
     FROM
-      \`elevate360-poc.ces_data_cgn.source\`
+      \`elevate360-poc.hyd_core_data.core-metrics\`
     WHERE
       ${whereClause}
-    GROUP BY
-      string_field_6
+    GROUP BY 
+      string_field_10
     ORDER BY
-      avg_ces_score_percentage DESC
-    LIMIT 10
+      sdr_count DESC  
   `;
-
-  console.log('Executing BigQuery:', query);
-
   try {
-    const [rows] = await bigquery.query({ query });
+    const [rows] = await bigquery.query({ query, params });
     res.json(rows);
+  } catch (err) {
+    console.error('BigQuery Error:', err);
+    res.status(500).send('Query Failed');
+  }
+});
+
+app.get('/api/escalation-rate', async (req, res) => {
+  const { startDate, endDate, businessLine, site } = req.query;
+  let filters = [
+    "string_field_18 = 'TRUE'",
+    "PARSE_DATE('%m/%d/%Y', string_field_4) BETWEEN @startDate AND @endDate"
+  ];
+  const params = { startDate, endDate };
+  if (site && site !== 'Select') {
+    filters.push("TRIM(string_field_14) = @site");
+    params.site = site.trim();
+  }
+  if (businessLine && businessLine !== 'Select') {
+    filters.push("string_field_5 = @businessLine");
+    params.businessLine = businessLine.trim();
+  }
+  const whereClause = filters.join(' AND ');
+  const query = `
+    SELECT
+      COUNTIF(string_field_19 = 'TRUE') AS total_escalation,
+      COUNT(*) AS total_closed_volume,
+      SAFE_DIVIDE(COUNTIF(string_field_19 = 'TRUE'), COUNT(*)) AS escalation_rate
+    FROM
+      \`elevate360-poc.hyd_core_data.core-metrics\`
+    WHERE
+      ${whereClause}
+  `;
+  try {
+    const [rows] = await bigquery.query({ query, params });
+    res.json(rows[0]);
   } catch (err) {
     console.error('BigQuery Error:', err);
     res.status(500).send('Query Failed');
@@ -75,101 +95,3 @@ app.get('/api/ces-data', async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
-
-// const express =require('express');
-// const  bodyParser = require('body-parser');
-// const cors = require('cors');
-// const { BigQuery } = require('@google-cloud/bigquery');
-
-// const SCOPES = [
-//   'https://www.googleapis.com/auth/bigquery',
-//   'https://www.googleapis.com/auth/drive.readonly' // Add this for Google Drive access
-// ];
-// const app = express();
-// const PORT = 3001;
-
-// app.use(cors());
-// app.use(bodyParser.json());
-
-// const bigquery = new BigQuery({
-//   keyFilename: './src/keys.json', // Make sure the filename and path are correct
-//   projectId: 'elevate360-poc',
-//   scopes: SCOPES, // Pass the array of scopes here
-
-// });
-
-// app.get('/api/ces-data', async (req, res) => {
-//   const { startDate, endDate, businessLine, site } = req.query;
-
-//   // Log incoming query parameters
-//   console.log('Received /api/ces-data request with params:', { startDate, endDate, businessLine, site});
-
-
-//   if (!startDate || !endDate) {
-//     console.log('Missing required date parameters');
-//     return res.status(400).json({ error: 'startDate and endDate are required as query parameters' });
-//   }
-
-//    const filters = [
-//     "SAFE_CAST(string_field_9 AS FLOAT64) IS NOT NULL",
-//     `PARSE_DATE('%Y-%m-%d', string_field_4) BETWEEN DATE('${startDate}') AND DATE('${endDate}')`
-//   ];
-
-//   // 2. Add the site filter to the array ONLY if a site is selected.
-//   if (site && site !== 'Select') {
-//     filters.push(`TRIM(string_field_8) = '${site.trim()}'`);
-
-//     // filters.push(`string_field_8 = '${site}'`);
-//   }
-
-//   // 3. Add the business line filter to the array ONLY if a business line is selected.
-//   if (businessLine && businessLine !== 'Select') {
-//     filters.push(`string_field_5 = '${businessLine}'`);
-//   }
-
-//     const whereClause = filters.join(' AND ');
-
-
-//     const query = `
-//     SELECT
-//       string_field_6 AS specialization,
-//       ROUND(AVG(SAFE_CAST(string_field_9 AS FLOAT64)), 2) AS avg_ces_score_percentage
-//     FROM
-//       \`elevate360-poc.ces_data_cgn.source\`
-//     WHERE
-//       ${whereClause}
-//     GROUP BY
-//       string_field_6
-//     ORDER BY
-//       avg_ces_score_percentage DESC
-//     LIMIT 10
-//   `;
-
-//   // Log the final query for debugging
-//   // console.log('Executing BigQuery: ', query);
-//   console.log('Executing BigQuery with filters:', {
-//     startDate,
-//     endDate,
-//     businessLine,
-//     site,
-//     whereClause
-//   });
-
-//   try {
-//     const [rows] = await bigquery.query({ query });
-//     // Log the result count and a sample row
-//     console.log(`Query returned ${rows.length} rows`);
-//     if (rows.length > 0) {
-//       console.log('Sample row:', rows[0]);
-//     }
-//     res.json(rows);
-//   } catch (err) {
-//     console.error('BigQuery Error:', err);
-//     res.status(500).send('Query Failed');
-//   }
-// });
-
-// app.listen(PORT, () => {
-//   console.log(`Server is running on http://localhost:${PORT}`);
-// });
-

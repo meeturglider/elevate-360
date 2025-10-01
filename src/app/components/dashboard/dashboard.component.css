@@ -185,8 +185,7 @@
 
 .banner {
   color: #fff;
-  border-radius: 0.5rem; /* rounded-lg */
-  /*padding: 0.75rem 1.5rem;  py-3 px-6 */
+  border-radius: 0.5rem;
   display: flex;
   flex-direction: row;
   align-items: flex-start;
@@ -205,37 +204,37 @@
 }
 /* filter - calendar */
 .custom-white-input.mat-mdc-form-field-appearance-fill .mat-mdc-text-field-wrapper {
-  background-color: white !important; /* Ensure a solid white background */
-  border-radius: 8px !important; /* Apply desired border radius */
-  border: 1px solid #d0d0d0 !important; /* Add a subtle gray border */
-  box-shadow: none !important; /* Remove any default shadow */
-  height: 48px !important; /* Set a consistent height */
-  box-sizing: border-box !important; /* Include padding/border in height */
-  padding: 0 16px !important; /* Adjust horizontal padding inside the box */
+  background-color: white !important; 
+  border-radius: 8px !important;
+  border: 1px solid #d0d0d0 !important; 
+  box-shadow: none !important; 
+  height: 48px !important; 
+  box-sizing: border-box !important; 
+  padding: 0 16px !important;
 }
 .custom-white-input.mat-mdc-form-field-appearance-fill .mat-mdc-form-field-underline {
   display: none !important;
 }
 .custom-white-input .mat-mdc-form-field-infix {
-  padding: 12px 0 !important; /* Vertical padding to center text */
-  min-height: 48px !important; /* Match overall height */
+  padding: 12px 0 !important; 
+  min-height: 48px !important; 
   display: flex !important;
   align-items: center !important;
 }
 .custom-white-input .mat-mdc-form-field-label {
-  color: rgba(0, 0, 0, 0.6) !important; /* Default label color */
-  top: 50% !important; /* Center vertically for initial position */
-  transform: translateY(-50%) !important; /* Adjust for actual centering */
-  left: 16px !important; /* Align with input padding */
+  color: rgba(0, 0, 0, 0.6) !important;
+  top: 50% !important; 
+  transform: translateY(-50%) !important; 
+  left: 16px !important; 
   transition: transform 0.2s ease-out, font-size 0.2s ease-out, top 0.2s ease-out !important;
 }
 .custom-white-input .mat-mdc-form-field-label.mdc-floating-label--float {
-  transform: translateY(-100%) scale(0.75) !important; /* Adjust to float above the box */
-  top: -8px !important; /* Move it outside the box */
-  left: 12px !important; /* Slightly indent the floating label */
-  background-color: white; /* Optional: background for label if it overlaps border */
-  padding: 0 4px; /* Optional: padding for the background */
-  z-index: 1; /* Ensure label is on top */
+  transform: translateY(-100%) scale(0.75) !important; 
+  top: -8px !important; 
+  left: 12px !important;
+  background-color: white;
+  padding: 0 4px;
+  z-index: 1;
 }
 .custom-white-input .mat-mdc-form-field-icon-suffix {
   align-self: center !important;
@@ -249,4 +248,9 @@
 .custom-white-input .mat-mdc-form-field-subscript-wrapper {
   height: 0 !important;
   overflow: hidden !important;
+}
+
+.total-associates-icon {
+  color: #007bff;
+  font-size: 20px;
 }
