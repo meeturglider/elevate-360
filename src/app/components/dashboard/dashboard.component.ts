@@ -11,6 +11,8 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { FilterService } from '../../services/filter.service';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome'; // Import the module
 
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { faUserGroup, faStar } from '@fortawesome/free-solid-svg-icons';
 
 interface SiteStats {
   associates: number;
@@ -78,6 +80,7 @@ export class DashboardComponent implements OnInit {
     private cesDataService: CesDataService,
     private filterService: FilterService
   ) {
+    library.add(faUserGroup, faStar); // Add icons to the library
   }
   selectedSite: string = 'Select';
   selectedBusinessline: string = 'Select';

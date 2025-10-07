@@ -59,14 +59,11 @@
           <h4 class="text-gray-500 text-sm">Total Associates</h4>
           <p class="text-2xl font-bold text-gray-800" id="totalAssociates">{{ totalAssociates }}</p>
         </div>
-        <div class="bg-blue-100 p-2 rounded">
-          <!-- <i class="fas fa-users text-blue-500"></i> -->
-          <fa-icon icon="user-friends" class="total-associates-icon"></fa-icon>
 
+        <div class="bg-blue-100 p-2 rounded">
+          <i class="fas fa-users text-blue-500"></i>
         </div>
-        <!-- <div class="metric-item">
-          <fa-icon icon="user-friends" class="total-associates-icon"></fa-icon>
-        </div> -->
+
       </div>
     </div>
     <div class="bg-white shadow rounded-lg p-4 border-l-4 border-green-500 cursor-pointer"
@@ -149,20 +146,21 @@
         <div class="grid grid-cols-2 gap-6">
           <button (click)="showMissions('Shrinkage')"
             class="flex items-center justify-start gap-2 bg-blue-50 text-blue-700 font-semibold py-2 px-3 rounded-lg hover:bg-blue-100 shadow">
-            <img src="shrinkage.png" alt="Shrinkage" class="w-6 h-6"> Shrinkage
+            <i class="fa-solid fa-minimize fa-lg"></i> Shrinkage
           </button>
           <button (click)="showMissions('Experiential Specialization Training')"
             class="flex items-center justify-start gap-2 bg-blue-50 text-blue-700 font-semibold py-2 px-3 rounded-lg hover:bg-blue-100 shadow">
-            <img src="training.png" alt="Experiential Specialization Training" class="w-6 h-6">
+            <!-- <img src="training.png" alt="Experiential Specialization Training" class="w-6 h-6"> -->
+            <i class="fa-solid fa-graduation-cap fa-lg"></i>
             Experiential Specialization Training
           </button>
           <button (click)="showMissions('Innovation / Transformation Ideas')"
             class="flex items-center justify-start gap-2 bg-blue-50 text-blue-700 font-semibold py-2 px-3 rounded-lg hover:bg-blue-100 shadow">
-            <img src="innovation.png" alt="Ideas" class="w-6 h-6"> Innovation / Transformation Ideas
+            <i class="fa-solid fa-medal fa-lg"></i> Innovation / Transformation Ideas
           </button>
           <button (click)="showMissions('Open Escalations')"
             class="flex items-center justify-start gap-2 bg-blue-50 text-blue-700 font-semibold py-2 px-3 rounded-lg hover:bg-blue-100 shadow">
-            <img src="esc_rate.png" alt="Esc" class="w-6 h-6"> Open Escalations
+            <i class="fa-solid fa-triangle-exclamation fa-lg"></i> Open Escalations
           </button>
         </div>
       </div>
@@ -170,49 +168,48 @@
 
 
 
-    <div class="bg-white p-6 rounded-lg shadow w-full mb-8">
-      <h5 class="text-lg font-semibold  mb-4 text-gray-800">Performance Metrics</h5>
-
+    <div class="bg-white p-6 rounded-lg shadow w-full mb-8 metrics-card">
+      <h5 class="text-lg font-semibold mb-4 text-gray-800">Performance Metrics</h5>
       <div class="grid grid-cols-2 gap-4">
         <button (click)="openCesPopup()"
           class="flex items-center justify-start gap-3 bg-blue-50 text-blue-700 font-semibold py-3 px-4 rounded-lg hover:bg-blue-100 shadow">
-          <img src="ces.png" alt="CES" class="w-7 h-7"> CES
+          <i class="fa-solid fa-chart-simple fa-xl"></i> CES
         </button>
         <button (click)="openSdrPopup()"
           class="flex items-center justify-start gap-3 bg-blue-50 text-blue-700 font-semibold py-3 px-4 rounded-lg hover:bg-blue-100 shadow">
-          <img src="sdr.png" alt="SDR" class="w-7 h-7"> SDR
+          <i class="fa-solid fa-clock-rotate-left fa-xl"></i> SDR
         </button>
         <button (click)="openEscalationPopup()"
           class="flex items-center justify-start gap-3 bg-blue-50 text-blue-700 font-semibold py-3 px-4 rounded-lg hover:bg-blue-100 shadow">
-          <img src="esc_rate.png" alt="Escalation Rate" class="w-7 h-7"> Escalation Rate
+          <i class="fa-solid fa-triangle-exclamation fa-xl"></i> Escalation Rate
         </button>
         <button (click)="showMissions('Quality')"
           class="flex items-center justify-start gap-3 bg-blue-50 text-blue-700 font-semibold py-3 px-4 rounded-lg hover:bg-blue-100 shadow">
-          <img src="quality.png" alt="Quality" class="w-7 h-7"> Quality
+          <i class="fa-regular fa-circle-check fa-xl"></i> Quality
         </button>
         <button (click)="showMissions('Average FMR')"
           class="flex items-center justify-start gap-3 bg-blue-50 text-blue-700 font-semibold py-3 px-4 rounded-lg hover:bg-blue-100 shadow">
-          <img src="fmr.png" alt="Average FMR Hrs" class="w-7 h-7"> Average FMR
+          <i class="fa-solid fa-stopwatch fa-xl"></i> Average FMR
         </button>
         <button (click)="showMissions('Hard Consult Rate')"
           class="flex items-center justify-start gap-3 bg-blue-50 text-blue-700 font-semibold py-3 px-4 rounded-lg hover:bg-blue-100 shadow">
-          <img src="hard.png" alt="Hard Consult Rate" class="w-7 h-7"> Hard Consult Rate
+          <i class="fa-solid fa-circle-user fa-xl"></i> Hard Consult Rate
         </button>
         <button (click)="showMissions('Signal Ratio')"
           class="flex items-center justify-start gap-3 bg-blue-50 text-blue-700 font-semibold py-3 px-4 rounded-lg hover:bg-blue-100 shadow">
-          <img src="hard_signal.png" class="w-7 h-7"> Signal Ratio
+          <i class="fa-solid fa-headphones fa-xl"></i> Signal Ratio
         </button>
         <button (click)="showMissions('Chat Compliance %')"
           class="flex items-center gap-3 bg-blue-50 text-blue-700 font-semibold py-3 px-4 rounded-lg hover:bg-blue-100 shadow">
-          <img src="chat_compliance.png" alt="Signal Ratio" class="w-7 h-7"> Chat Compliance %
+          <i class="fa-solid fa-headset fa-xl"></i> Chat Compliance %
         </button>
         <button (click)="showMissions('Chat %')"
           class="flex items-center justify-start gap-3 bg-blue-50 text-blue-700 font-semibold py-3 px-4 rounded-lg hover:bg-blue-100 shadow">
-          <img src="chat.png" alt="Chat Compliance %" class="w-7 h-7"> Chat %
+          <i class="fa-solid fa-comments fa-xl"></i> Chat %
         </button>
         <button (click)="showMissions('Backlog Control Rate')"
           class="flex items-center justify-start gap-3 bg-blue-50 text-blue-700 font-semibold py-3 px-4 rounded-lg hover:bg-blue-100 shadow">
-          <img src="shrinkage.png" alt="Chat %" class="w-7 h-7"> Backlog Control Rate
+          <i class="fa-solid fa-percent fa-xl"></i> Backlog Control Rate
         </button>
       </div>
     </div>
@@ -388,7 +385,8 @@
     <div *ngIf="escalationPopupData.length > 0; else noEscData">
       <ul class="space-y-2 text-sm text-gray-700 max-h-72 overflow-y-auto">
         <li *ngFor="let row of escalationPopupData" class="flex flex-col bg-blue-100 rounded px-4 py-2 font-medium">
-          <span>Escalation Rate: <span class="font-bold text-blue-700">{{ row.escalation_rate | percent:'1.2-2' }}</span></span>
+          <span>Escalation Rate: <span class="font-bold text-blue-700">{{ row.escalation_rate | percent:'1.2-2'
+              }}</span></span>
           <span>Total Escalation: {{ row.total_escalation }}</span>
           <span>Total Closed Volume: {{ row.total_closed_volume }}</span>
         </li>
