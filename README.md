@@ -1,27 +1,18 @@
-"dependencies": {
-    "@angular/cdk": "^19.2.19",
-    "@angular/common": "^19.2.0",
-    "@angular/compiler": "^19.2.0",
-    "@angular/core": "^19.2.0",
-    "@angular/forms": "^19.2.0",
-    "@angular/material": "^19.2.19",
-    "@angular/platform-browser": "^19.2.0",
-    "@angular/platform-browser-dynamic": "^19.2.0",
-    "@angular/router": "^19.2.0",
-    "rxjs": "~7.8.0",
-    "tslib": "^2.3.0",
-    "zone.js": "~0.15.0"
-  },
-  "devDependencies": {
-    "@angular-devkit/build-angular": "^19.2.15",
-    "@angular/cli": "^19.2.15",
-    "@angular/compiler-cli": "^19.2.0",
-    "@types/jasmine": "~5.1.0",
-    "jasmine-core": "~5.6.0",
-    "karma": "~6.4.0",
-    "karma-chrome-launcher": "~3.2.0",
-    "karma-coverage": "~2.2.0",
-    "karma-jasmine": "~5.1.0",
-    "karma-jasmine-html-reporter": "~2.1.0",
-    "typescript": "~5.7.2"
-  }
+1. Node.js and Angular CLI installation 
+
+npm install -g @angular/cli
+
+
+2. Clone the Repository
+   
+3. Install Dependencies
+Run this to install Angular, Material, Tailwind, and Font Awesome dependencies.
+
+npm install
+
+4. Run the Application
+   
+ng serve --open
+
+ link for localhost: http://localhost:4200/ 
+
