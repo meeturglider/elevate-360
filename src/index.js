@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const { BigQuery } = require('@google-cloud/bigquery');
+// const emailjs = require('@emailjs/nodejs');
 
 const SCOPES = [
   'https://www.googleapis.com/auth/bigquery',
@@ -18,6 +19,21 @@ const bigquery = new BigQuery({
   projectId: 'elevate360-poc',
   scopes: SCOPES,
 });
+
+// const gmrClient = new GMRClient({
+//   keyFilename: './src/keys.json',
+//   projectId: 'elevate360-poc',
+// });
+
+// const EMAILJS_SERVICE_ID = 'service_kj4vmwp';
+// const EMAILJS_TEMPLATE_ID = 'template_y6uiu37';
+// const EMAILJS_PUBLIC_KEY = 'TSj3bq6Ew_TjrTSeO';
+// const EMAILJS_PRIVATE_KEY = 'i_p_JgGTUlLGxIupkJSYr';
+
+// emailjs.init({
+//   publicKey: EMAILJS_PUBLIC_KEY,
+//   privateKey: EMAILJS_PRIVATE_KEY,
+// });
 
 app.get('/api/sdr-by-specialization', async (req, res) => {
   const { startDate, endDate, businessLine, site } = req.query;
@@ -89,6 +105,81 @@ app.get('/api/escalation-rate', async (req, res) => {
   } catch (err) {
     console.error('BigQuery Error:', err);
     res.status(500).send('Query Failed');
+  }
+});
+
+app.post('/api/send-announcement', async (req, res) => {
+  const { specialization, message, from_email } = req.body;
+
+  // 4. Build BigQuery query to get Owner_ldap
+  let queryOptions = {
+    query: `
+      SELECT DISTINCT string_field_12 AS owner_ldap
+      FROM \`elevate360-poc.hyd_core_data.core-metrics\`
+      WHERE string_field_10 = @specialization
+    `,
+    params: { specialization: specialization }
+  };
+
+  // If 'all' is selected, get all owners
+  if (specialization === 'all') {
+    queryOptions = {
+      query: `
+        SELECT DISTINCT string_field_12 AS owner_ldap
+        FROM \`elevate360-poc.hyd_core_data.core-metrics\`
+      `
+      // No params needed
+    };
+  }
+
+  try {
+    // 5. Get LDAP list from BigQuery
+    const [rows] = await bigquery.query(queryOptions);
+
+    if (rows.length === 0) {
+      return res.status(404).send({ error: 'No recipients found for this specialization.' });
+    }
+
+    const recipientEmails = rows
+      .map(row => `${row.owner_ldap}@google.com`) 
+      .join(',');
+
+    console.log('Sending announcement via GMR to:', recipientEmails);
+
+    // 7. Prepare variables for the EmailJS template
+    // const templateParams = {
+    //   to_email: recipientEmails,  // This will go to the 'To', 'CC', or 'BCC' field in your template
+    //   message: message,           // The announcement message
+    //   reply_to: from_email,       // The "from" email you provided
+    //   from_name: from_email,      // Makes the email appear "from" this person
+    // };
+
+    // // 8. Send the email
+    // await emailjs.send(
+    //   EMAILJS_SERVICE_ID,
+    //   EMAILJS_TEMPLATE_ID,
+    //   templateParams
+    // );
+
+    // const gmrPayload = {
+    //   sender: from_email,
+    //   // GMR might take recipients as an array or a comma-separated string.
+    //   // If it needs an array, use: recipientEmails.split(',')
+    //   to: recipientEmails,
+    //   subject: 'Dashboard Announcement', // You can add a subject
+    //   body: message,
+    //   bodyType: 'PLAIN_TEXT' // or 'HTML'
+    // };
+
+    // // ✨ 8. (HYPOTHETICAL) Call the GMR client's 'send' method
+    // // The method name 'send' or 'messages.create' is also a guess.
+    // await gmrClient.send(gmrPayload);
+
+    res.status(200).send({ success: true, message: 'Announcement sent via GMR!' });
+
+  } catch (err) {
+    console.error('Error:', err);
+    res.status(500).send({ error: 'Failed to send announcement.' });
   }
 });
 
